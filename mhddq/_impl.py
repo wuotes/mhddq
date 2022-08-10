@@ -29,6 +29,9 @@ def _cb_threadmain() -> None:
     while True:
         _mhddq.module_mutex.acquire()
 
+        if _mhddq.active is False and 0 < len(_mhddq.cb_queue):
+            print(r'cb queue!')
+
         if _mhddq.active is False and 0 == len(_mhddq.op_queue) and 0 == len(_mhddq.cb_queue):
             _mhddq.module_mutex.release()
 
@@ -54,6 +57,9 @@ def _io_threadmain() -> None:
 
     while True:
         _mhddq.module_mutex.acquire()
+
+        if _mhddq.active is False and 0 < len(_mhddq.op_queue):
+            print(r'op queue!')
 
         if _mhddq.active is False and 0 == len(_mhddq.op_queue):
             _mhddq.module_mutex.release()
