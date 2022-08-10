@@ -27,13 +27,13 @@ def cb_file_exists(args):
     #                     # if result is False then this would be { 'exception': str }
     # }
     
-    # print the result, 'filename exists: False'
+    # print the result, 'file.txt exists: False'
     print(args['params']['filename'] + ' exists: ' + str(args['output']['exists']))
 
 # if multiple operations need to be grouped together you can use an oplist
 fileops = mhddq.create_empty_oplist()
 
-# oplists have their own sets of functions calls
+# oplists have their own sets of function calls
 # in practice it ends up being the same as mhddq.file_exists()
 # except the io thread considers the entire oplist as a single
 # operation and won't yield to it's sister thread until the list
