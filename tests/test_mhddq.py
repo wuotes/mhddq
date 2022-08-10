@@ -9,7 +9,9 @@
 from msilib.schema import File
 from sys import path, stderr
 
+path.append(r'.')
 path.append(r'./mhddq')
+path.append(r'./tests')
 
 import mhddq
 import time
