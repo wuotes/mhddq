@@ -38,7 +38,7 @@ def _cb_threadmain() -> None:
             queue_empty = False
             item = _mhddq.cb_queue.pop(0)
 
-            if item[r'params'][r'callback'] is not None:
+            if callable(item[r'params'][r'callback']) is True:
                 item[r'params'][r'callback'](item)
 
         else:
@@ -118,7 +118,7 @@ def _shutdown() -> None:
 def _is_shutdown() -> bool:
     _mhddq.module_mutex.acquire()
 
-    result = _mhddq.active is False and _mhddq.io_thread[0] is None
+    result = _mhddq.cb_thread is None
 
     _mhddq.module_mutex.release()
 
