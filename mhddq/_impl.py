@@ -7,6 +7,8 @@
 #######################################################################
 
 from copy import deepcopy
+from datetime import datetime
+from sys import stderr
 from threading import Lock, Thread
 from typing import Callable, Type, Union
 
@@ -38,8 +40,12 @@ def _cb_threadmain() -> None:
             queue_empty = False
             item = _mhddq.cb_queue.pop(0)
 
-            if callable(item[r'params'][r'callback']) is True:
-                item[r'params'][r'callback'](item)
+            try:
+                if callable(item[r'params'][r'callback']) is True:
+                    item[r'params'][r'callback'](item)
+
+            except Exception as cb_exception:
+                print('[{0}] An exception was caught from during execution of an IO callback method: {1}'.format(datetime.now().strftime('%m/%d %I:%M %p'), str(cb_exception)), file=stderr)
 
         else:
             queue_empty = True
