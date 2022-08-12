@@ -238,7 +238,7 @@ def test_oplist():
     assert mhddq.enqueue_oplist(oplist) is True
 
 def test_shutdown():  # this should be the last test
-    assert mhddq.file_exists(None, r'./tests/test_dir/test.file') is True
+    assert mhddq.file_exists(expect_any, r'./tests/test_dir/test.file') is True
     assert mhddq.shutdown() is None
 
     while mhddq.is_shutdown() is False:
