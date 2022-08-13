@@ -66,7 +66,7 @@ def _cb_threadmain() -> None:
                     item[r'params'][r'callback'](item)
 
             except Exception as cb_exception:
-                print('[{0}] An exception was caught from during execution of an IO callback method: {1}'.format(datetime.now().strftime('%m/%d %I:%M %p'), str(cb_exception)), file=stderr)
+                print('[{0}] An exception was caught from during execution of an IO callback method --\nParams: {2}\nException: {1}'.format(datetime.now().strftime('%m/%d %I:%M %p'), str(cb_exception), str(item)), file=stderr)
 
         else:
             queue_empty = True
