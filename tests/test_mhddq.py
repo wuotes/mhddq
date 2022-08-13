@@ -6,6 +6,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.            #
 #######################################################################
 
+#######################################################################
+#                                                                     #
+#         IMPORTS                                                     #
+#                                                                     #
+#######################################################################
 from sys import path, stderr
 
 path.append(r'./mhddq')
@@ -13,6 +18,11 @@ path.append(r'./mhddq')
 import mhddq
 import time
 
+#######################################################################
+#                                                                     #
+#         CALLBACKS                                                   #
+#                                                                     #
+#######################################################################
 def expect_true(params):
     try:
         assert (type(params) is dict) is True
@@ -96,6 +106,11 @@ def expect_false(params):
 def expect_any(params):
     pass
 
+#######################################################################
+#                                                                     #
+#         TESTS                                                       #
+#                                                                     #
+#######################################################################
 def test_cleanup_previous():  # cleans up if a previous test attempt failed
     mhddq.directory_delete(expect_any, r'./tests/fake_dir')
     mhddq.directory_delete(expect_any, r'./tests/test_dir')

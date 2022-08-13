@@ -29,6 +29,8 @@ def cb_file_exists(args):
     
     # print the result, 'file.txt exists: False'
     print(args['params']['filename'] + ' exists: ' + str(args['output']['exists']))
+    
+    # if a callback throws an exception it is caught and printed to stderr
 
 # if multiple operations need to be grouped together you can use an oplist
 fileops = mhddq.create_empty_oplist()

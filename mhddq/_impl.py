@@ -6,6 +6,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.            #
 #######################################################################
 
+#######################################################################
+#                                                                     #
+#         IMPORTS                                                     #
+#                                                                     #
+#######################################################################
 from copy import deepcopy
 from datetime import datetime
 from sys import stderr
@@ -16,7 +21,15 @@ import os
 import shutil
 import time
 
+#######################################################################
+#                                                                     #
+#         _MHDDQ                                                      #
+#                                                                     #
+#######################################################################
 class _mhddq():
+    ###################################################################
+    #         CLASS VARIABLES                                         #
+    ###################################################################
     module_mutex: Type[Lock] = Lock()  # this should NEVER be acquired by a _file_## or _directory_## function
     io_mutex: Type[Lock] = Lock()  # this should ONLY be acquired by a _file_## or _directory_## function
     io_thread: list = None
@@ -25,6 +38,14 @@ class _mhddq():
     op_queue: list = []
     active: bool = True  # once set to False this can't be True again
 
+#######################################################################
+#                                                                     #
+#         PRIVATE IMPLEMENTATION                                      #
+#                                                                     #
+#######################################################################
+#######################################################################
+#         _CB_THREADMAIN                                              #
+#######################################################################
 def _cb_threadmain() -> None:
     queue_empty: bool = False
 
@@ -55,6 +76,9 @@ def _cb_threadmain() -> None:
         if queue_empty is True:
             time.sleep(0.01)
 
+#######################################################################
+#         _IO_THREADMAIN                                              #
+#######################################################################
 def _io_threadmain() -> None:
     queue_empty: bool = False
 
@@ -85,6 +109,9 @@ def _io_threadmain() -> None:
         if queue_empty is True:
             time.sleep(0.01)
 
+#######################################################################
+#         _PROCESS_SUBQUEUE                                           #
+#######################################################################
 def _process_subqueue(subqueue: list) -> None:
     while 0 < len(subqueue):
         item = subqueue.pop(0)
@@ -95,6 +122,9 @@ def _process_subqueue(subqueue: list) -> None:
         else:
             item[r'object'](item[r'params'])
 
+#######################################################################
+#         _INIT                                                       #
+#######################################################################
 def _init() -> None:
     _mhddq.module_mutex.acquire()
     _mhddq.cb_thread = Thread(target=_cb_threadmain)
@@ -104,6 +134,9 @@ def _init() -> None:
     _mhddq.io_thread[1].start()
     _mhddq.module_mutex.release()
 
+#######################################################################
+#         _SHUTDOWN                                                   #
+#######################################################################
 def _shutdown() -> None:
     _mhddq.module_mutex.acquire()
 
@@ -121,6 +154,9 @@ def _shutdown() -> None:
 
     _mhddq.module_mutex.release()
 
+#######################################################################
+#         _IS_SHUTDOWN                                                #
+#######################################################################
 def _is_shutdown() -> bool:
     _mhddq.module_mutex.acquire()
 
@@ -130,6 +166,9 @@ def _is_shutdown() -> bool:
 
     return result
 
+#######################################################################
+#         _ENQUEUE                                                    #
+#######################################################################
 def _enqueue(object: Union[Callable, list], params: dict) -> bool:
     _mhddq.module_mutex.acquire()
 
@@ -148,6 +187,9 @@ def _enqueue(object: Union[Callable, list], params: dict) -> bool:
 
     return True
 
+#######################################################################
+#         _DIRECTORY_EXISTS                                           #
+#######################################################################
 def _directory_exists(params: dict) -> None:
     # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
@@ -169,6 +211,9 @@ def _directory_exists(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_CREATE                                           #
+#######################################################################
 def _directory_create(params: dict) -> None:
     # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
@@ -190,6 +235,9 @@ def _directory_create(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_DELETE_CONTENTS                                  #
+#######################################################################
 def _directory_delete_contents(dirname: str) -> None:
     contents = os.listdir(dirname)
 
@@ -204,6 +252,9 @@ def _directory_delete_contents(dirname: str) -> None:
 
             os.rmdir(full_path)
 
+#######################################################################
+#         _DIRECTORY_DELETE                                           #
+#######################################################################
 def _directory_delete(params: dict) -> None:
     # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
@@ -227,6 +278,9 @@ def _directory_delete(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_RENAME                                           #
+#######################################################################
 def _directory_rename(params: dict) -> None:
     # params = { r'callback': Callable, 'old_dirname': str, 'new_dirname': str }
     result: bool = True
@@ -248,6 +302,9 @@ def _directory_rename(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_MOVE                                             #
+#######################################################################
 def _directory_move(params: dict) -> None:
     # params = { r'callback': Callable, 'source_dirname': str, 'destination_dirname': str }
     result: bool = True
@@ -269,6 +326,9 @@ def _directory_move(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_COPY                                             #
+#######################################################################
 def _directory_copy(params: dict) -> None:
     # params = { r'callback': Callable, 'source_dirname': str, 'copy_dirname': str }
     result: bool = True
@@ -306,6 +366,9 @@ def _directory_copy(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _DIRECTORY_CONTENTS                                         #
+#######################################################################
 def _directory_contents(params: dict) -> None:
     # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
@@ -337,6 +400,9 @@ def _directory_contents(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_EXISTS                                                #
+#######################################################################
 def _file_exists(params: dict) -> None:
     # params = { r'callback': Callable, 'filename': str }
     result: bool = True
@@ -358,6 +424,9 @@ def _file_exists(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_CREATE                                                #
+#######################################################################
 def _file_create(params: dict) -> None:
     # params = { r'callback': Callable, 'filename': str }
     result: bool = True
@@ -380,6 +449,9 @@ def _file_create(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_DELETE                                                #
+#######################################################################
 def _file_delete(params: dict) -> None:
     # params = { r'callback': Callable, 'filename': str }
     result: bool = True
@@ -401,6 +473,9 @@ def _file_delete(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_RENAME                                                #
+#######################################################################
 def _file_rename(params: dict) -> None:
     # params = { r'callback': Callable, 'original_filename': str, 'new_filename': str }
     result: bool = True
@@ -422,6 +497,9 @@ def _file_rename(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_MOVE                                                  #
+#######################################################################
 def _file_move(params: dict) -> None:
     # params = { r'callback': Callable, 'source_filename': str, 'destination_filename': str }
     result: bool = True
@@ -443,6 +521,9 @@ def _file_move(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_COPY                                                  #
+#######################################################################
 def _file_copy(params: dict) -> None:
     # params = { r'callback': Callable, 'source_filename': str, 'copy_filename': str }
     result: bool = True
@@ -468,6 +549,9 @@ def _file_copy(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_READ                                                  #
+#######################################################################
 def _file_read(params: dict) -> None:
     # params = { r'callback': Callable, 'filename': str, 'binary': bool }
     result: bool = True
@@ -497,6 +581,9 @@ def _file_read(params: dict) -> None:
 
     _mhddq.io_mutex.release()
 
+#######################################################################
+#         _FILE_WRITE                                                 #
+#######################################################################
 def _file_write(params: dict) -> None:
     # params = { r'callback': Callable, 'data': str|bytearray, 'filename': str, 'binary': bool }
     result: bool = True
