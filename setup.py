@@ -18,7 +18,7 @@ def read_file(filename: str) -> str:
 
 setup(
     name=r'mhddq',
-    version=r'0.1.0',    
+    version=r'0.1.1',    
     description=r'Module implementing a multi-threaded hdd io queue.',
     long_description=read_file(r'./README.md'),
     long_description_content_type=r'text/markdown',
