@@ -87,7 +87,8 @@ def expect_true_and_contents(params):
         for item in params[r'output'][r'contents']:
             assert (r'name' in item.keys()) is True
             assert (r'type' in item.keys()) is True
-            assert ((r'test.file' == item[r'name'] and r'file' == item[r'type']) or (r'other_dir' == item[r'name'] and r'directory' == item[r'type'])) is True
+            assert ((r'test.file' == item[r'name'] and r'file' == item[r'type']) or
+                    (r'other_dir' == item[r'name'] and r'directory' == item[r'type'])) is True
 
     except Exception as test_exception:
         print(params, file=stderr)
@@ -212,16 +213,16 @@ def test_oplist():
     mhddq.oplist_directory_exists(oplist, expect_true_and_exists_true, r'./tests/fake_dir')
     mhddq.oplist_file_create(oplist, expect_true, r'./tests/fake_dir/fake.file')
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_true, r'./tests/fake_dir/fake.file')
-    mhddq.oplist_file_write(oplist, expect_true, r'TEST WRITE TEST DATA', r'./tests/fake_dir/fake.file', binary=True)
+    mhddq.oplist_file_write(oplist, expect_true, r'TEST WRITE TEST DATA', r'./tests/fake_dir/fake.file', binary=True,)
     mhddq.oplist_file_read(oplist, expect_true_and_data, r'./tests/fake_dir/fake.file', binary=True)
-    mhddq.oplist_file_rename(oplist, expect_true, r'./tests/fake_dir/fake.file', r'./tests/fake_dir/test.file')
+    mhddq.oplist_file_rename(oplist, expect_true, r'./tests/fake_dir/fake.file', r'./tests/fake_dir/test.file',)
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_false, r'./tests/fake_dir/fake.file')
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_true, r'./tests/fake_dir/test.file')
     mhddq.oplist_directory_create(oplist, expect_true, r'./tests/test_dir')
-    mhddq.oplist_file_move(oplist, expect_true, r'./tests/fake_dir/test.file', r'./tests/test_dir/test.file')
+    mhddq.oplist_file_move(oplist, expect_true, r'./tests/fake_dir/test.file', r'./tests/test_dir/test.file',)
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_false, r'./tests/fake_dir/test.file')
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_true, r'./tests/test_dir/test.file')
-    mhddq.oplist_file_copy(oplist, expect_true, r'./tests/test_dir/test.file', r'./tests/fake_dir/test.file')
+    mhddq.oplist_file_copy(oplist, expect_true, r'./tests/test_dir/test.file', r'./tests/fake_dir/test.file',)
     mhddq.oplist_file_exists(oplist, expect_true_and_exists_true, r'./tests/fake_dir/test.file')
     mhddq.oplist_directory_exists(oplist, expect_true_and_exists_true, r'./tests/fake_dir')
     mhddq.oplist_directory_delete(oplist, expect_true, r'./tests/fake_dir')
@@ -259,4 +260,4 @@ def test_shutdown():  # this should be the last test
     while mhddq.is_shutdown() is False:
         time.sleep(0.01)
 
-    assert mhddq.file_exists(expect_any, r'./tests/test_dir/test.file') is False
+    assert mhddq.file_exists(expect_any,r'./tests/test_dir/test.file') is False
