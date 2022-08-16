@@ -238,6 +238,7 @@ def test_oplist():
 
     sublist = mhddq.create_empty_oplist()
 
+    mhddq.clear_oplist(sublist)
     mhddq.oplist_directory_exists(sublist, expect_true_and_exists_false, r'./tests/test_dir/other_dir')
     mhddq.oplist_directory_move(sublist, expect_true, r'./tests/other_dir', r'./tests/test_dir/other_dir')
     mhddq.oplist_directory_exists(sublist, expect_true_and_exists_false, r'./tests/other_dir')

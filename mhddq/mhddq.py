@@ -43,10 +43,10 @@ def directory_exists(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_exists,
-        {
-            r'callback': callback,
-            r'dirname': dirname
-        },
+        _impl._io_params(
+            callback = callback,
+            path = dirname,
+        ),
     )
 
 #######################################################################
@@ -58,10 +58,10 @@ def directory_create(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_create,
-        {
-            r'callback': callback,
-            r'dirname': dirname
-        },
+        _impl._io_params(
+            callback = callback,
+            path = dirname,
+        ),
     )
 
 #######################################################################
@@ -73,10 +73,10 @@ def directory_delete(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_delete,
-        {
-            r'callback': callback,
-            r'dirname': dirname
-        },
+        _impl._io_params(
+            callback = callback,
+            path = dirname,
+        ),
     )
 
 #######################################################################
@@ -89,11 +89,11 @@ def directory_rename(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_rename,
-        {
-            r'callback': callback,
-            r'old_dirname': old_dirname,
-            r'new_dirname': new_dirname,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = old_dirname,
+            target = new_dirname,
+        ),
     )
 
 #######################################################################
@@ -106,13 +106,12 @@ def directory_move(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_move,
-        {
-            r'callback': callback,
-            r'source_dirname': source_dirname,
-            r'destination_dirname': destination_dirname,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = source_dirname,
+            target = destination_dirname,
+        ),
     )
-
 
 #######################################################################
 #         DIRECTORY_COPY                                              #
@@ -124,11 +123,11 @@ def directory_copy(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_copy,
-        {
-            r'callback': callback,
-            r'source_dirname': source_dirname,
-            r'copy_dirname': copy_dirname,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = source_dirname,
+            target = copy_dirname,
+        ),
     )
 
 #######################################################################
@@ -140,10 +139,10 @@ def directory_contents(
 ) -> bool:
     return _impl._enqueue(
         _impl._directory_contents,
-        {
-            r'callback': callback,
-            r'dirname': dirname
-        },
+        _impl._io_params(
+            callback = callback,
+            path = dirname,
+        ),
     )
 
 #######################################################################
@@ -155,10 +154,10 @@ def file_exists(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_exists,
-        {
-            r'callback': callback,
-            r'filename': filename
-        },
+        _impl._io_params(
+            callback = callback,
+            path = filename,
+        ),
     )
 
 #######################################################################
@@ -170,10 +169,10 @@ def file_create(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_create,
-        {
-            r'callback': callback,
-            r'filename': filename
-        },
+        _impl._io_params(
+            callback = callback,
+            path = filename,
+        ),
     )
 
 #######################################################################
@@ -185,10 +184,10 @@ def file_delete(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_delete,
-        {
-            r'callback': callback,
-            r'filename': filename
-        },
+        _impl._io_params(
+            callback = callback,
+            path = filename,
+        ),
     )
 
 #######################################################################
@@ -201,11 +200,11 @@ def file_rename(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_rename,
-        {
-            r'callback': callback,
-            r'original_filename': original_filename,
-            r'new_filename': new_filename,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = original_filename,
+            target = new_filename,
+        ),
     )
 
 #######################################################################
@@ -218,11 +217,11 @@ def file_move(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_move,
-        {
-            r'callback': callback,
-            r'source_filename': source_filename,
-            r'destination_filename': destination_filename,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = source_filename,
+            target = destination_filename,
+        ),
     )
 
 #######################################################################
@@ -235,11 +234,11 @@ def file_copy(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_copy,
-        {
-            r'callback': callback,
-            r'source_filename': source_filename,
-            r'copy_filename': copy_filename,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = source_filename,
+            target = copy_filename,
+        ),
     )
 
 #######################################################################
@@ -252,11 +251,11 @@ def file_read(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_read,
-        {
-            r'callback': callback,
-            r'filename': filename,
-            r'binary': binary
-        },
+        _impl._io_params(
+            callback = callback,
+            path = filename,
+            option = binary,
+        ),
     )
 
 #######################################################################
@@ -270,12 +269,12 @@ def file_write(
 ) -> bool:
     return _impl._enqueue(
         _impl._file_write,
-        {
-            r'callback': callback,
-            r'data': data,
-            r'filename': filename,
-            r'binary': binary,
-        },
+        _impl._io_params(
+            callback = callback,
+            path = filename,
+            target = data,
+            option = binary,
+        ),
     )
 
 #######################################################################
@@ -321,13 +320,13 @@ def oplist_directory_exists(
     dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_exists,
-            r'params': {
-                r'callback': callback,
-                r'dirname': dirname
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_exists,
+            params = _impl._io_params(
+                callback = callback,
+                path = dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -339,13 +338,13 @@ def oplist_directory_create(
     dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_create,
-            r'params': {
-                r'callback': callback,
-                r'dirname': dirname
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_create,
+            params = _impl._io_params(
+                callback = callback,
+                path = dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -357,13 +356,13 @@ def oplist_directory_delete(
     dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_delete,
-            r'params': {
-                r'callback': callback,
-                r'dirname': dirname
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_delete,
+            params = _impl._io_params(
+                callback = callback,
+                path = dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -376,14 +375,14 @@ def oplist_directory_rename(
     new_dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_rename,
-            r'params': {
-                r'callback': callback,
-                r'old_dirname': old_dirname,
-                r'new_dirname': new_dirname,
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_rename,
+            params = _impl._io_params(
+                callback = callback,
+                path = old_dirname,
+                target = new_dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -396,14 +395,14 @@ def oplist_directory_move(
     destination_dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_move,
-            r'params': {
-                r'callback': callback,
-                r'source_dirname': source_dirname,
-                r'destination_dirname': destination_dirname,
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_move,
+            params = _impl._io_params(
+                callback = callback,
+                path = source_dirname,
+                target = destination_dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -416,14 +415,14 @@ def oplist_directory_copy(
     copy_dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_copy,
-            r'params': {
-                r'callback': callback,
-                r'source_dirname': source_dirname,
-                r'copy_dirname': copy_dirname,
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_copy,
+            params = _impl._io_params(
+                callback = callback,
+                path = source_dirname,
+                target = copy_dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -435,13 +434,13 @@ def oplist_directory_contents(
     dirname: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._directory_contents,
-            r'params': {
-                r'callback': callback,
-                r'dirname': dirname
-            },
-        }
+        _impl._io_item(
+            object = _impl._directory_copy,
+            params = _impl._io_params(
+                callback = callback,
+                path = dirname,
+            ),
+        ),
     )
 
 #######################################################################
@@ -453,13 +452,13 @@ def oplist_file_exists(
     filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_exists,
-            r'params': {
-                r'callback': callback,
-                r'filename': filename
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_exists,
+            params = _impl._io_params(
+                callback = callback,
+                path = filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -471,13 +470,13 @@ def oplist_file_create(
     filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_create,
-            r'params': {
-                r'callback': callback,
-                r'filename': filename
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_create,
+            params = _impl._io_params(
+                callback = callback,
+                path = filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -489,13 +488,13 @@ def oplist_file_delete(
     filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_delete,
-            r'params': {
-                r'callback': callback,
-                r'filename': filename
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_delete,
+            params = _impl._io_params(
+                callback = callback,
+                path = filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -508,14 +507,14 @@ def oplist_file_rename(
     new_filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_rename,
-            r'params': {
-                r'callback': callback,
-                r'original_filename': original_filename,
-                r'new_filename': new_filename,
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_rename,
+            params = _impl._io_params(
+                callback = callback,
+                path = original_filename,
+                target = new_filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -528,14 +527,14 @@ def oplist_file_move(
     destination_filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_move,
-            r'params': {
-                r'callback': callback,
-                r'source_filename': source_filename,
-                r'destination_filename': destination_filename,
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_move,
+            params = _impl._io_params(
+                callback = callback,
+                path = source_filename,
+                target = destination_filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -548,14 +547,14 @@ def oplist_file_copy(
     copy_filename: str
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_copy,
-            r'params': {
-                r'callback': callback,
-                r'source_filename': source_filename,
-                r'copy_filename': copy_filename,
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_copy,
+            params = _impl._io_params(
+                callback = callback,
+                path = source_filename,
+                target = copy_filename,
+            ),
+        ),
     )
 
 #######################################################################
@@ -568,14 +567,14 @@ def oplist_file_read(
     binary: bool = False
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_read,
-            r'params': {
-                r'callback': callback,
-                r'filename': filename,
-                r'binary': binary,
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_read,
+            params = _impl._io_params(
+                callback = callback,
+                path = filename,
+                option = binary,
+            ),
+        ),
     )
 
 #######################################################################
@@ -589,13 +588,13 @@ def oplist_file_write(
     binary: bool = False,
 ) -> None:
     oplist.append(
-        {
-            r'object': _impl._file_write,
-            r'params': {
-                r'callback': callback,
-                r'data': data,
-                r'filename': filename,
-                r'binary': binary,
-            },
-        }
+        _impl._io_item(
+            object = _impl._file_write,
+            params = _impl._io_params(
+                callback = callback,
+                path = filename,
+                target = data,
+                option = binary,
+            ),
+        ),
     )

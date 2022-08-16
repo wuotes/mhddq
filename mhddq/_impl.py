@@ -23,8 +23,11 @@ import time
 
 #######################################################################
 #                                                                     #
-#         _MHDDQ                                                      #
+#         CLASSES                                                     #
 #                                                                     #
+#######################################################################
+#######################################################################
+#         _MHDDQ                                                      #
 #######################################################################
 class _mhddq:
     ###################################################################
@@ -42,10 +45,129 @@ class _mhddq:
     cb_queue: list = []  # callback queue
     active: bool = True  # once set to False this can't be True again
 
+#######################################################################
+#         _IO_PARAMS                                                  #
+#######################################################################
+class _io_params(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_params',
+        callback: Callable = None,
+        path: str = r'',
+        target: Union[str, bytearray] = r'',
+        option: bool = False,
+    ):
+        self[r'callback']: Callable = callback
+        self[r'path']: str = path
+        self[r'target']: Union[str, bytearray] = target
+        self[r'option']: bool = option
+
+#######################################################################
+#         _IO_ITEM                                                    #
+#######################################################################
+class _io_item(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_item',
+        object: Union[Callable, list] = None,
+        params: dict = _io_params(),
+    ):
+        self[r'object']: Union[Callable, list] = object
+        self[r'params']: dict = params
+
+#######################################################################
+#         _CB_ITEM                                                    #
+#######################################################################
+class _cb_item(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_cb_item',
+        action: str = r'Unspecified',
+        result: bool = False,
+        params: dict = _io_params(),
+        output: dict = {},
+    ):
+        self[r'action']: str = action
+        self[r'result']: bool = result
+        self[r'params']: dict = params
+        self[r'output']: dict = output
+
+#######################################################################
+#         _IO_OUTPUT_EXCEPTION                                        #
+#######################################################################
+class _io_output_exception(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_output_exception',
+        exception: str = r'',
+    ):
+        self[r'exception']: str = exception
+
+#######################################################################
+#         _IO_OUTPUT_EXISTS                                           #
+#######################################################################
+class _io_output_exists(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_output_exists',
+        exists: bool = False,
+    ):
+        self[r'exists']: bool = exists
+
+#######################################################################
+#         _IO_OUTPUT_CONTENTS                                         #
+#######################################################################
+class _io_output_contents(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_output_contents',
+        contents: list = [],
+    ):
+        self[r'contents']: list = contents
+
+#######################################################################
+#         _IO_OUTPUT_DATA                                             #
+#######################################################################
+class _io_output_data(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_output_data',
+        data: Union[str, bytearray] = r'',
+    ):
+        self[r'data']: Union[str, bytearray] = data
+
+#######################################################################
+#         _IO_OUTPUT_CONTENT_ITEM                                     #
+#######################################################################
+class _io_output_content_item(dict):
+    ###################################################################
+    #     CONSTRUCTOR, INSTANCE VARIABLES                             #
+    ###################################################################
+    def __init__(
+        self: r'_io_output_content_item',
+        name: str = r'',
+        type: str = r'file',
+    ):
+        self[r'name'] = name
+        self[r'type'] = type
 
 #######################################################################
 #                                                                     #
-#         PRIVATE IMPLEMENTATION                                      #
+#         FUNCTIONS                                                   #
 #                                                                     #
 #######################################################################
 #######################################################################
@@ -156,9 +278,9 @@ def _process_subqueue(subqueue: list) -> None:
 #######################################################################
 def _init() -> None:
     _mhddq.module_mutex.acquire()
-    _mhddq.cb_thread = Thread(target=_cb_threadmain)
+    _mhddq.cb_thread = Thread(target = _cb_threadmain)
     _mhddq.cb_thread.start()
-    _mhddq.io_thread = [Thread(target=_io_threadmain), Thread(target=_io_threadmain)]
+    _mhddq.io_thread = [Thread(target = _io_threadmain), Thread(target = _io_threadmain)]
     _mhddq.io_thread[0].start()
     _mhddq.io_thread[1].start()
     _mhddq.module_mutex.release()
@@ -212,7 +334,7 @@ def _enqueue(object: Union[Callable, list], params: dict) -> bool:
         _mhddq.module_mutex.acquire()
 
     # all objects in an io queue must be a dict with these two keys
-    _mhddq.io_queue.append({ r'object': object, r'params': params })
+    _mhddq.io_queue.append(_io_item(object = object, params = params))
     _mhddq.module_mutex.release()
 
     return True
@@ -221,25 +343,24 @@ def _enqueue(object: Union[Callable, list], params: dict) -> bool:
 #         _DIRECTORY_EXISTS                                           #
 #######################################################################
 def _directory_exists(params: dict) -> None:
-    # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
 
     _mhddq.io_mutex.acquire()
 
     try:
-        output: dict = { r'exists': os.path.exists(params[r'dirname']) }
+        output: dict = _io_output_exists(exists = os.path.exists(params[r'path']))
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_exists',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_exists',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -247,26 +368,25 @@ def _directory_exists(params: dict) -> None:
 #         _DIRECTORY_CREATE                                           #
 #######################################################################
 def _directory_create(params: dict) -> None:
-    # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        os.mkdir(params[r'dirname'])
+        os.mkdir(params[r'path'])
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_create',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_create',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -291,28 +411,27 @@ def _directory_delete_contents(dirname: str) -> None:
 #         _DIRECTORY_DELETE                                           #
 #######################################################################
 def _directory_delete(params: dict) -> None:
-    # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        _directory_delete_contents(params[r'dirname'])
+        _directory_delete_contents(params[r'path'])
 
         os.rmdir(params[r'dirname'])
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_delete',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_delete',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -320,26 +439,25 @@ def _directory_delete(params: dict) -> None:
 #         _DIRECTORY_RENAME                                           #
 #######################################################################
 def _directory_rename(params: dict) -> None:
-    # params = { r'callback': Callable, 'old_dirname': str, 'new_dirname': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        shutil.move(params[r'old_dirname'], params[r'new_dirname'])
+        shutil.move(params[r'path'], params[r'target'])
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_rename',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_rename',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -347,26 +465,25 @@ def _directory_rename(params: dict) -> None:
 #         _DIRECTORY_MOVE                                             #
 #######################################################################
 def _directory_move(params: dict) -> None:
-    # params = { r'callback': Callable, 'source_dirname': str, 'destination_dirname': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        shutil.move(params[r'source_dirname'], params[r'destination_dirname'])
+        shutil.move(params[r'path'], params[r'target'])
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_move',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_move',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -374,19 +491,18 @@ def _directory_move(params: dict) -> None:
 #         _DIRECTORY_COPY                                             #
 #######################################################################
 def _directory_copy(params: dict) -> None:
-    # params = { r'callback': Callable, 'source_dirname': str, 'copy_dirname': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        if os.path.exists(params[r'copy_dirname']) is True:
+        if os.path.exists(params[r'target']) is True:
             raise FileExistsError
 
-        for source_dir, subdirs, files in os.walk(params[r'source_dirname']):
+        for source_dir, subdirs, files in os.walk(params[r'path']):
             destination_dir = source_dir.replace(
-                params[r'source_dirname'], params[r'copy_dirname'], 1
+                params[r'path'], params[r'target'], 1
             )
 
             if not os.path.exists(destination_dir):
@@ -403,15 +519,15 @@ def _directory_copy(params: dict) -> None:
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_copy',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_copy',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -419,35 +535,34 @@ def _directory_copy(params: dict) -> None:
 #         _DIRECTORY_CONTENTS                                         #
 #######################################################################
 def _directory_contents(params: dict) -> None:
-    # params = { r'callback': Callable, 'dirname': str }
     result: bool = True
-    output: dict = { r'contents': [] }
+    output: dict = _io_output_contents(contents = [])
 
     _mhddq.io_mutex.acquire()
 
     try:
-        contents: list = os.listdir(params[r'dirname'])
+        contents: list = os.listdir(params[r'path'])
 
         for item in contents:
-            if os.path.isfile(os.path.join(params[r'dirname'], item)) is True:
+            if os.path.isfile(os.path.join(params[r'path'], item)) is True:
                 item_type: str = r'file'
 
             else:
                 item_type: str = r'directory'
 
-            output[r'contents'].append({r'name': item, r'type': item_type})
+            output[r'contents'].append(_io_output_content_item(name = item, type = item_type))
 
     except Exception as dir_exception:
         result: bool = False
-        output: dict = { r'exception': str(dir_exception) }
+        output: dict = _io_output_exception(exception = str(dir_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'directory_contents',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'directory_contents',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -455,25 +570,24 @@ def _directory_contents(params: dict) -> None:
 #         _FILE_EXISTS                                                #
 #######################################################################
 def _file_exists(params: dict) -> None:
-    # params = { r'callback': Callable, 'filename': str }
     result: bool = True
 
     _mhddq.io_mutex.acquire()
 
     try:
-        output: dict = { r'exists': os.path.exists(params[r'filename']) }
+        output: dict = _io_output_exists(exists = os.path.exists(params[r'path']))
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_exists',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_exists',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -481,27 +595,26 @@ def _file_exists(params: dict) -> None:
 #         _FILE_CREATE                                                #
 #######################################################################
 def _file_create(params: dict) -> None:
-    # params = { r'callback': Callable, 'filename': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        with open(params[r'filename'], r'x') as file:
+        with open(params[r'path'], r'x') as file:
             pass
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_create',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_create',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -509,26 +622,25 @@ def _file_create(params: dict) -> None:
 #         _FILE_DELETE                                                #
 #######################################################################
 def _file_delete(params: dict) -> None:
-    # params = { r'callback': Callable, 'filename': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        os.remove(params[r'filename'])
+        os.remove(params[r'path'])
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_delete',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_delete',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -536,26 +648,25 @@ def _file_delete(params: dict) -> None:
 #         _FILE_RENAME                                                #
 #######################################################################
 def _file_rename(params: dict) -> None:
-    # params = { r'callback': Callable, 'original_filename': str, 'new_filename': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        os.rename(params[r'original_filename'], params[r'new_filename'])
+        os.rename(params[r'path'], params[r'target'])
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_rename',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_rename',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -563,26 +674,25 @@ def _file_rename(params: dict) -> None:
 #         _FILE_MOVE                                                  #
 #######################################################################
 def _file_move(params: dict) -> None:
-    # params = { r'callback': Callable, 'source_filename': str, 'destination_filename': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        shutil.move(params[r'source_filename'], params[r'destination_filename'])
+        shutil.move(params[r'path'], params[r'target'])
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_move',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_move',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -590,30 +700,29 @@ def _file_move(params: dict) -> None:
 #         _FILE_COPY                                                  #
 #######################################################################
 def _file_copy(params: dict) -> None:
-    # params = { r'callback': Callable, 'source_filename': str, 'copy_filename': str }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        if os.path.exists(params[r'copy_filename']) is True:
+        if os.path.exists(params[r'target']) is True:
             raise FileExistsError
             # shutil.copy2 hangs on Windows if the dest file already exists
 
-        shutil.copy2(params[r'source_filename'], params[r'copy_filename'])
+        shutil.copy2(params[r'path'], params[r'target'])
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_copy',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_copy',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -621,33 +730,32 @@ def _file_copy(params: dict) -> None:
 #         _FILE_READ                                                  #
 #######################################################################
 def _file_read(params: dict) -> None:
-    # params = { r'callback': Callable, 'filename': str, 'binary': bool }
     result: bool = True
 
     _mhddq.io_mutex.acquire()
 
     try:
-        if params[r'binary'] is True:
-            file = open(params[r'filename'], r'rb')
+        if params[r'option'] is True:
+            file = open(params[r'path'], r'rb')
 
         else:
-            file = open(params[r'filename'], r'rt')
+            file = open(params[r'path'], r'rt')
 
-        output: dict = { r'data': file.read() }
+        output: dict = _io_output_data(data = file.read())
 
         file.close()
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_read',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_read',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
 
@@ -655,32 +763,31 @@ def _file_read(params: dict) -> None:
 #         _FILE_WRITE                                                 #
 #######################################################################
 def _file_write(params: dict) -> None:
-    # params = { r'callback': Callable, 'data': str|bytearray, 'filename': str, 'binary': bool }
     result: bool = True
     output: dict = {}
 
     _mhddq.io_mutex.acquire()
 
     try:
-        if params[r'binary'] is True:
-            file = open(params[r'filename'], r'wb')
+        if params[r'option'] is True:
+            file = open(params[r'path'], r'wb')
 
         else:
-            file = open(params[r'filename'], r'wt')
+            file = open(params[r'path'], r'wt')
 
-        file.write(params[r'data'])
+        file.write(params[r'target'])
         file.close()
 
     except Exception as file_exception:
         result: bool = False
-        output: dict = { r'exception': str(file_exception) }
+        output: dict = _io_output_exception(exception = str(file_exception))
 
     _mhddq.cb_queue.append(
-        {
-            r'action': r'file_write',
-            r'result': result,
-            r'params': params,
-            r'output': output,
-        }
+        _cb_item(
+            action = r'file_write',
+            result = result,
+            params = params,
+            output = output,
+        )
     )
     _mhddq.io_mutex.release()
